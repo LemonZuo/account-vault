@@ -27,7 +27,7 @@ func (c *CRUD[T]) Register(rg *gin.RouterGroup, path string) {
 
 func (c *CRUD[T]) List(ctx *gin.Context) {
 	var items []T
-	q := c.DB.Order("id DESC")
+	q := c.DB.Order("id ASC")
 	if kw := ctx.Query("kw"); kw != "" {
 		// 简单的全列模糊搜索：交给前端各表自己传，这里只是预留位
 		_ = kw

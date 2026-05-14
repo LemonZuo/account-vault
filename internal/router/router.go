@@ -4,9 +4,9 @@ import (
 	"io/fs"
 	"strings"
 
-	"account-vault/internal/handler"
-	"account-vault/internal/model"
-	"account-vault/internal/web"
+	"github.com/LemonZuo/account-vault/internal/handler"
+	"github.com/LemonZuo/account-vault/internal/model"
+	"github.com/LemonZuo/account-vault/internal/web"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

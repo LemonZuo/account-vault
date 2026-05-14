@@ -1,7 +1,7 @@
 package db
 
 import (
-	"account-vault/internal/config"
+	"github.com/LemonZuo/account-vault/internal/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

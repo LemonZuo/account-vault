@@ -1,4 +1,4 @@
-module account-vault
+module github.com/LemonZuo/account-vault
 
 go 1.25.0
 

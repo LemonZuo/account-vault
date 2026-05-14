@@ -5,9 +5,9 @@ import (
 	"io/fs"
 	"log"
 
-	"account-vault/internal/config"
-	"account-vault/internal/db"
-	"account-vault/internal/router"
+	"github.com/LemonZuo/account-vault/internal/config"
+	"github.com/LemonZuo/account-vault/internal/db"
+	"github.com/LemonZuo/account-vault/internal/router"
 )
 
 //go:embed all:frontend/dist

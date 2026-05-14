@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"account-vault/internal/model"
+	"github.com/LemonZuo/account-vault/internal/model"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
