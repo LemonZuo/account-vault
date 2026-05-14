@@ -80,10 +80,10 @@ export default function Layout() {
                 to={`/t/${t.key}`}
                 className={({ isActive }) =>
                   cn(
-                    'group flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
+                    'group flex items-center gap-2.5 rounded-md border px-3 py-1.5 text-[13px] font-medium transition-[background-color,border-color,color,box-shadow]',
                     isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground',
+                      ? cn(cs.picker, 'shadow-sm')
+                      : 'border-transparent text-muted-foreground hover:bg-accent/60 hover:text-foreground',
                   )
                 }
               >
