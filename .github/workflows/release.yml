@@ -63,17 +63,30 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
+      - name: Resolve version
+        id: ver
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "commit=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Build
         env:
           CGO_ENABLED: '0'
           GOOS: linux
+          VERSION: ${{ steps.ver.outputs.version }}
+          COMMIT: ${{ steps.ver.outputs.commit }}
         run: |
           mkdir -p dist
+          PKG=github.com/LemonZuo/account-vault/internal/buildinfo
           for arch in amd64 arm64; do
             echo "==> building $arch"
             GOARCH=$arch go build \
               -trimpath \
-              -ldflags="-s -w" \
+              -ldflags="-s -w -X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT}" \
               -o "dist/server-linux-${arch}" .
           done
           ls -la dist

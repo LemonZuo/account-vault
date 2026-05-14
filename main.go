@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 
+	"github.com/LemonZuo/account-vault/internal/buildinfo"
 	"github.com/LemonZuo/account-vault/internal/config"
 	"github.com/LemonZuo/account-vault/internal/db"
 	"github.com/LemonZuo/account-vault/internal/router"
@@ -14,6 +15,8 @@ import (
 var frontendFS embed.FS
 
 func main() {
+	log.Printf("account-vault %s (commit %s) starting", buildinfo.Version, buildinfo.Commit)
+
 	cfg := config.Load()
 
 	gormDB, err := db.New(cfg)

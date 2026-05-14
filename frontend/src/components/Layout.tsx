@@ -12,6 +12,26 @@ import {
   DrawerTitle,
 } from './ui/drawer'
 import CommandPalette from './CommandPalette'
+import { api } from '../api'
+
+function useAppVersion() {
+  const [version, setVersion] = useState('')
+  useEffect(() => {
+    let alive = true
+    api
+      .get<{ version: string }>('/version')
+      .then((res) => {
+        if (!alive) return
+        const v = res.data?.version ?? ''
+        setVersion(/^v\d/.test(v) ? v : v ? `v${v}` : '')
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+  return version
+}
 
 function useCurrentTable() {
   const loc = useLocation()
@@ -41,6 +61,7 @@ export default function Layout() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const widePicker = useMediaQuery('(min-width: 430px)')
   const current = useCurrentTable()
+  const displayVersion = useAppVersion()
   const navigate = useNavigate()
   const currentCs = getColorSet(current.color)
   const pickerColumns = widePicker ? 3 : 2
@@ -60,7 +81,7 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen flex-col sm:flex-row">
       {/* 桌面端侧栏 */}
-      <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-card/40 px-3 py-6 backdrop-blur-sm sm:flex">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-card/40 px-3 py-6 backdrop-blur-sm sm:flex">
         <div className="mb-6 flex items-center justify-between px-3">
           <div>
             <div className="text-[13px] font-semibold tracking-tight">Vault</div>
@@ -71,7 +92,7 @@ export default function Layout() {
           </span>
         </div>
 
-        <nav className="flex-1 space-y-0.5">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto">
           {tables.map((t) => {
             const cs = getColorSet(t.color)
             return (
@@ -104,6 +125,12 @@ export default function Layout() {
           </span>
           <Kbd>⌘K</Kbd>
         </button>
+
+        {displayVersion && (
+          <div className="mt-3 px-3 text-[10.5px] font-mono tabular-nums text-muted-foreground/60">
+            {displayVersion}
+          </div>
+        )}
       </aside>
 
       {/* 移动端顶栏 */}
@@ -118,7 +145,13 @@ export default function Layout() {
           </span>
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
-        <span className="text-[11px] text-muted-foreground">Vault</span>
+        {displayVersion ? (
+          <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground/70">
+            {displayVersion}
+          </span>
+        ) : (
+          <span />
+        )}
       </header>
 
       {/* 移动端表切换：底部弹起 Drawer */}

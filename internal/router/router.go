@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"strings"
 
+	"github.com/LemonZuo/account-vault/internal/buildinfo"
 	"github.com/LemonZuo/account-vault/internal/handler"
 	"github.com/LemonZuo/account-vault/internal/model"
 	"github.com/LemonZuo/account-vault/internal/web"
@@ -44,6 +45,13 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 
 	api.GET("/tables", func(c *gin.Context) {
 		c.JSON(200, gin.H{"data": Tables})
+	})
+
+	api.GET("/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"version": buildinfo.Version,
+			"commit":  buildinfo.Commit,
+		})
 	})
 
 	handler.NewCRUD[model.Apple](db).Register(api, "/apple")
