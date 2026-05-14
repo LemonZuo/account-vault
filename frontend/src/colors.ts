@@ -12,9 +12,11 @@ export const colorMap: Record<string, ColorSet> = {
   emerald: { dot: 'bg-emerald-500', border: 'border-emerald-500/40 hover:border-emerald-500/80', halo: 'hover:shadow-[0_0_24px_0_rgb(16_185_129_/_0.35)]' },
   orange:  { dot: 'bg-orange-500',  border: 'border-orange-500/40 hover:border-orange-500/80', halo: 'hover:shadow-[0_0_24px_0_rgb(249_115_22_/_0.35)]' },
   sky:     { dot: 'bg-sky-500',     border: 'border-sky-500/40 hover:border-sky-500/80',     halo: 'hover:shadow-[0_0_24px_0_rgb(14_165_233_/_0.35)]' },
+  teal:    { dot: 'bg-teal-500',    border: 'border-teal-500/40 hover:border-teal-500/80',    halo: 'hover:shadow-[0_0_24px_0_rgb(20_184_166_/_0.35)]' },
   amber:   { dot: 'bg-amber-500',   border: 'border-amber-500/40 hover:border-amber-500/80', halo: 'hover:shadow-[0_0_24px_0_rgb(245_158_11_/_0.35)]' },
   rose:    { dot: 'bg-rose-500',    border: 'border-rose-500/40 hover:border-rose-500/80',   halo: 'hover:shadow-[0_0_24px_0_rgb(244_63_94_/_0.35)]' },
   violet:  { dot: 'bg-violet-500',  border: 'border-violet-500/40 hover:border-violet-500/80', halo: 'hover:shadow-[0_0_24px_0_rgb(139_92_246_/_0.35)]' },
+  claude:  { dot: 'bg-[#d97757]',    border: 'border-[#d97757]/45 hover:border-[#d97757]/85', halo: 'hover:shadow-[0_0_24px_0_rgb(217_119_87_/_0.35)]' },
 }
 
 // 头像背景：低饱和深色单色，按字符串哈希挑一个。

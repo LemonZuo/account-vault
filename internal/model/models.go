@@ -53,6 +53,15 @@ type Openai struct {
 
 func (Openai) TableName() string { return "tb_openai" }
 
+type Claude struct {
+	ID         int    `gorm:"primaryKey;column:id" json:"id"`
+	Mail       string `gorm:"column:mail" json:"mail"`
+	SessionKey string `gorm:"column:session_key" json:"session_key"`
+	Area       string `gorm:"column:area" json:"area"`
+}
+
+func (Claude) TableName() string { return "tb_claude" }
+
 type SoftAccount struct {
 	ID       int    `gorm:"primaryKey;column:id" json:"id"`
 	Type     string `gorm:"column:type" json:"type"`
@@ -75,3 +84,16 @@ type MiddlewareAccount struct {
 }
 
 func (MiddlewareAccount) TableName() string { return "tb_middleware_account" }
+
+type ComponentsAccount struct {
+	PublicIP string `gorm:"primaryKey;column:public_ip" json:"public_ip"`
+	LoclaIP  string `gorm:"column:locla_ip" json:"locla_ip"`
+	Port     string `gorm:"primaryKey;column:port" json:"port"`
+	Type     string `gorm:"primaryKey;column:type" json:"type"`
+	User     string `gorm:"column:user" json:"user"`
+	Password string `gorm:"column:password" json:"password"`
+	Remark   string `gorm:"column:remark" json:"remark"`
+	LocalIP  string `gorm:"column:local_ip" json:"local_ip"`
+}
+
+func (ComponentsAccount) TableName() string { return "tb_components_account" }

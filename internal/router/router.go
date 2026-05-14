@@ -23,10 +23,12 @@ type TableMeta struct {
 var Tables = []TableMeta{
 	{Key: "apple", Label: "Apple 账号", Path: "apple"},
 	{Key: "openai", Label: "OpenAI 账号", Path: "openai"},
+	{Key: "claude", Label: "Claude 账号", Path: "claude"},
 	{Key: "idc_flare", Label: "IDC Flare", Path: "idc-flare"},
 	{Key: "linux_do", Label: "Linux.do", Path: "linux-do"},
 	{Key: "network", Label: "宽带账户", Path: "network"},
 	{Key: "soft_account", Label: "软件账号", Path: "soft-account"},
+	{Key: "components_account", Label: "组件账号", Path: "components-account"},
 	{Key: "middleware_account", Label: "中间件账号", Path: "middleware-account"},
 }
 
@@ -46,10 +48,12 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 
 	handler.NewCRUD[model.Apple](db).Register(api, "/apple")
 	handler.NewCRUD[model.Openai](db).Register(api, "/openai")
+	handler.NewCRUD[model.Claude](db).Register(api, "/claude")
 	handler.NewCRUD[model.IdcFlare](db).Register(api, "/idc-flare")
 	handler.NewCRUD[model.LinuxDo](db).Register(api, "/linux-do")
 	handler.NewCRUD[model.Network](db).Register(api, "/network")
 	handler.NewCRUD[model.SoftAccount](db).Register(api, "/soft-account")
+	handler.NewComponentsAccountHandler(db).Register(api)
 	handler.NewMiddlewareAccountHandler(db).Register(api)
 
 	// 前端单页：未命中 /api/* 的请求都交给 embed 出来的 dist
