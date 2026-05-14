@@ -21,11 +21,12 @@
 
 ```
 account-vault/
-├── backend/        Go 服务
-│   ├── cmd/server/main.go
-│   ├── internal/{config,db,handler,model,router}
-│   └── .env.example
-└── frontend/       React 前端
+├── main.go                            Go 入口；//go:embed all:frontend/dist
+├── go.mod / go.sum
+├── .env / .env.example
+├── internal/{config,db,handler,model,router,web}
+└── frontend/                          React 前端
+    ├── dist/                          vite 产物，被根 main.go embed
     └── src/{App.tsx, components, tables.ts, api.ts}
 ```
 
@@ -33,17 +34,16 @@ account-vault/
 
 1. 拷贝并填写环境变量：
    ```sh
-   cd backend
    cp .env.example .env
    # 编辑 .env 填上 DB_HOST / DB_PORT / DB_USER / DB_PASSWORD / DB_NAME
    ```
 
-2. 选用本地的 Go（多版本目录 `/opt/module/go`）：
+2. 选用本地的 Go（多版本目录 `/opt/module/go`，需要 ≥ 1.25）：
    ```sh
-   export PATH=/opt/module/go/go1.23.8/bin:$PATH
-   go run ./cmd/server
+   export PATH=/opt/module/go/go1.25.0/bin:$PATH
+   go run .
    # 或者构建后运行
-   go build -o bin/server ./cmd/server && ./bin/server
+   go build -o bin/server . && ./bin/server
    ```
 
    服务默认监听 `:8080`，可在 `.env` 中改 `SERVER_ADDR`。
@@ -54,10 +54,18 @@ account-vault/
 cd frontend
 npm install      # 已安装可跳过
 npm run dev      # 开发模式，默认 http://localhost:5173
-npm run build    # 生产构建到 dist/
+npm run build    # 生产构建到 dist/，被 //go:embed 打入后端二进制
 ```
 
 Vite 已配置 `/api` 代理到 `http://localhost:8080`，开发环境无需另开 CORS。
+
+## 单二进制发布
+
+```sh
+cd frontend && npm run build && cd ..
+go build -o bin/server .
+./bin/server   # 同时提供 /api 和 / （前端 SPA）
+```
 
 ## API
 

@@ -1,9 +1,13 @@
 package router
 
 import (
+	"io/fs"
+	"strings"
+
 	"account-vault/internal/config"
 	"account-vault/internal/handler"
 	"account-vault/internal/model"
+	"account-vault/internal/web"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -27,7 +31,7 @@ var Tables = []TableMeta{
 	{Key: "middleware_account", Label: "中间件账号", Path: "middleware-account"},
 }
 
-func Setup(cfg *config.Config, db *gorm.DB) *gin.Engine {
+func Setup(cfg *config.Config, db *gorm.DB, frontend fs.FS) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{cfg.CORSOrigin, "http://localhost:5173", "http://127.0.0.1:5173"},
@@ -49,6 +53,16 @@ func Setup(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	handler.NewCRUD[model.Network](db).Register(api, "/network")
 	handler.NewCRUD[model.SoftAccount](db).Register(api, "/soft-account")
 	handler.NewMiddlewareAccountHandler(db).Register(api)
+
+	// 前端单页：未命中 /api/* 的请求都交给 embed 出来的 dist
+	spa := web.SPAHandler(frontend)
+	r.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+		spa(c)
+	})
 
 	return r
 }
