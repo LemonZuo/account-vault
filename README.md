@@ -1,32 +1,18 @@
 # Account Vault
 
-一套个人账号 / 凭据管理工具，Go (Gin + GORM) 后端 + React (Vite + TS + Tailwind v4) 前端，
+一套个人数据管理工具，Go (Gin + GORM) 后端 + React (Vite + TS + Tailwind v4) 前端，
 卡片式现代极简风格，桌面端和移动端均自适应。
-
-## 表
-
-后端会直接连接你提供的 MySQL 数据库，对以下 7 张表做 CRUD：
-
-| 表名 | 说明 | 主键 |
-| --- | --- | --- |
-| `tb_apple` | Apple 账号 | 自增 id |
-| `tb_openai` | OpenAI 账号 | 自增 id |
-| `tb_idc_flare` | IDC Flare | 自增 id |
-| `tb_linux_do` | Linux.do | 自增 id |
-| `tb_network` | 宽带账户 | 自增 id |
-| `tb_soft_account` | 软件账号 | 自增 id |
-| `tb_middleware_account` | 中间件账号 | 复合键 `public_ip + port + type` |
 
 ## 目录
 
 ```
 account-vault/
-├── main.go                            Go 入口；//go:embed all:frontend/dist
+├── main.go
 ├── go.mod / go.sum
 ├── .env / .env.example
 ├── internal/{config,db,handler,model,router,web}
-└── frontend/                          React 前端
-    ├── dist/                          vite 产物，被根 main.go embed
+└── frontend/
+    ├── dist/
     └── src/{App.tsx, components, tables.ts, api.ts}
 ```
 
@@ -69,23 +55,10 @@ go build -o bin/server .
 
 ## API
 
-- `GET    /api/{path}`         列表
-- `POST   /api/{path}`         新增（提交字段见各表 model）
-- `PUT    /api/{path}/:id`     按 id 更新（自增 id 表）
-- `DELETE /api/{path}/:id`     按 id 删除（自增 id 表）
-
-`middleware-account` 表无 id，特殊接口：
-
-- `GET    /api/middleware-account`
-- `POST   /api/middleware-account`
-- `PUT    /api/middleware-account`  body: `{ _orig_public_ip, _orig_port, _orig_type, data: {...} }`
-- `DELETE /api/middleware-account?public_ip=&port=&type=`
-
-`GET /api/tables` 会返回所有可用表的元数据，前端可用作动态导航。
+后端提供前端所需的数据读写能力。具体数据细节以代码与实际部署配置为准，README 不展开。
 
 ## 设计要点
 
-- **无鉴权**：仅本地/内网使用，前端直连 8080。
-- **密码明文显示**：按需求未做遮蔽，列表卡片上每个字段右侧带一键复制按钮。
+- **部署边界**：默认面向可信网络环境；如需公网暴露，应在外层增加访问控制。
 - **响应式**：≥640px 显示左侧固定导航；移动端顶栏 + 底部横向滚动 tab。
 - **新增/编辑**：底部弹起的卡片式 Modal，移动端体验接近原生 sheet。
