@@ -1,13 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, Search, Loader2 } from 'lucide-react'
-import clsx from 'clsx'
+import { Plus, Search, Loader2, Inbox } from 'lucide-react'
+import { motion } from 'motion/react'
 import { api } from '../api'
 import { getTable } from '../tables'
 import { getColorSet } from '../colors'
+import { cn } from '../lib/utils'
 import RecordCard from './RecordCard'
 import RecordForm from './RecordForm'
 import Modal from './Modal'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog'
 
 export default function TableView() {
   const { tableKey } = useParams<{ tableKey: string }>()
@@ -18,6 +32,7 @@ export default function TableView() {
   const [kw, setKw] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Record<string, any> | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<Record<string, any> | null>(null)
 
   const load = async () => {
     if (!def) return
@@ -37,8 +52,7 @@ export default function TableView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableKey])
 
-  if (!def) return <div className="p-6 text-zinc-500">未找到该表</div>
-
+  if (!def) return <div className="p-6 text-muted-foreground">未找到该表</div>
   const cs = getColorSet(def.color)
 
   const filtered = records.filter((r) => {
@@ -81,8 +95,10 @@ export default function TableView() {
     await load()
   }
 
-  const onDelete = async (r: Record<string, any>) => {
-    if (!confirm('确认删除？')) return
+  const confirmDelete = async () => {
+    const r = pendingDelete
+    if (!r) return
+    setPendingDelete(null)
     if (def.hasId) {
       await api.delete(`/${def.path}/${r.id}`)
     } else {
@@ -95,94 +111,100 @@ export default function TableView() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-32 pt-4 sm:pt-10 sm:px-8">
-      {/* 桌面端：大标题 + chip + 工具栏 */}
-      <div className="mb-6 hidden flex-wrap items-center justify-between gap-3 sm:flex">
+      {/* 桌面端 header */}
+      <div className="mb-8 hidden flex-wrap items-end justify-between gap-3 sm:flex">
         <div className="flex items-center gap-3">
-          <h1 className="text-[28px] font-bold tracking-tight">{def.label}</h1>
-          <span
-            className={clsx(
-              'rounded-full px-2.5 py-0.5 text-xs font-medium',
-              cs.chip,
-            )}
-          >
-            {filtered.length}
-          </span>
+          <span className={cn('h-2 w-2 rounded-full', cs.dot)} />
+          <h1 className="text-[28px] font-bold tracking-tight leading-none">{def.label}</h1>
+          <Badge variant="muted" className="font-mono tabular-nums">{filtered.length}</Badge>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search
-              size={15}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+              size={14}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
-            <input
+            <Input
               value={kw}
               onChange={(e) => setKw(e.target.value)}
-              placeholder="搜索…"
-              className="w-44 rounded-xl border border-zinc-200 bg-white/80 py-2 pl-8 pr-3 text-sm shadow-sm outline-none transition focus:w-60 focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60"
+              placeholder="搜索"
+              className="h-8 w-44 pl-7 text-[13px] transition-[width] focus-visible:w-60"
             />
           </div>
-          <button
-            onClick={onAdd}
-            className="flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-          >
-            <Plus size={15} />
+          <Button size="sm" onClick={onAdd}>
+            <Plus className="h-3.5 w-3.5" />
             新增
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* 移动端：搜索框占满 + 数量 chip */}
-      <div className="mb-4 flex items-center gap-2 sm:hidden">
-        <div className="relative flex-1">
+      {/* 移动端：搜索框 */}
+      <div className="mb-4 sm:hidden">
+        <div className="relative">
           <Search
-            size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
-          <input
+          <Input
             value={kw}
             onChange={(e) => setKw(e.target.value)}
-            placeholder={`搜索 ${filtered.length} 条记录…`}
-            className="w-full rounded-xl border border-zinc-200 bg-white/80 py-2.5 pl-8 pr-3 text-sm shadow-sm outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60"
+            placeholder={`搜索 ${filtered.length} 条记录`}
+            className="h-10 pl-8"
           />
         </div>
-        <span
-          className={clsx(
-            'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium',
-            cs.chip,
-          )}
-        >
-          {filtered.length}
-        </span>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20 text-zinc-400">
-          <Loader2 className="animate-spin" />
+        <div className="flex justify-center py-20 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-200 py-20 text-center text-sm text-zinc-400 dark:border-zinc-800">
-          {kw ? '没有匹配的记录' : '暂无数据，点击右下角 + 添加'}
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border py-16 text-center text-muted-foreground">
+          <Inbox className="h-5 w-5 opacity-50" />
+          <p className="text-[13px]">{kw ? '没有匹配的记录' : '暂无数据'}</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <motion.div
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: { transition: { staggerChildren: 0.03 } },
+            hidden: {},
+          }}
+        >
           {filtered.map((r, i) => (
-            <RecordCard
+            <motion.div
               key={def.hasId ? r.id : `${r.public_ip}-${r.port}-${r.type}-${i}`}
-              record={r}
-              def={def}
-              onEdit={() => onEdit(r)}
-              onDelete={() => onDelete(r)}
-            />
+              variants={{
+                hidden: { opacity: 0, y: 8 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+            >
+              <RecordCard
+                record={r}
+                def={def}
+                onEdit={() => onEdit(r)}
+                onDelete={() => setPendingDelete(r)}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
-      <button
+      {/* 移动端浮动新增按钮 */}
+      <Button
+        size="icon"
         onClick={onAdd}
-        className="fixed bottom-24 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/30 transition hover:scale-105 active:scale-95 sm:hidden dark:bg-white dark:text-zinc-900"
+        className="fixed bottom-6 right-5 z-30 h-12 w-12 rounded-full shadow-lg active:scale-95 sm:hidden"
+        aria-label="新增"
       >
-        <Plus size={22} />
-      </button>
+        <Plus className="h-5 w-5" />
+      </Button>
 
       <Modal
         open={modalOpen}
@@ -196,6 +218,24 @@ export default function TableView() {
           onCancel={() => setModalOpen(false)}
         />
       </Modal>
+
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(o) => { if (!o) setPendingDelete(null) }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              该操作不可撤销，记录将被永久删除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

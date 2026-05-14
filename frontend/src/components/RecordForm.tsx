@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import type { Field } from '../tables'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
+import { Label } from './ui/label'
+import { Button } from './ui/button'
 
 interface Props {
   fields: Field[]
@@ -33,47 +37,36 @@ export default function RecordForm({ fields, initial, onSubmit, onCancel }: Prop
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4">
+    <form onSubmit={submit} className="space-y-3.5">
       {fields.map((f) => (
         <div key={f.key} className="space-y-1.5">
-          <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            {f.label}
-          </label>
+          <Label htmlFor={`field-${f.key}`}>{f.label}</Label>
           {f.type === 'textarea' ? (
-            <textarea
+            <Textarea
+              id={`field-${f.key}`}
               value={data[f.key] ?? ''}
               placeholder={f.placeholder}
               onChange={(e) => set(f.key, e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:focus:bg-zinc-900"
             />
           ) : (
-            <input
-              type="text"
+            <Input
+              id={`field-${f.key}`}
               value={data[f.key] ?? ''}
               placeholder={f.placeholder}
               onChange={(e) => set(f.key, e.target.value)}
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:focus:bg-zinc-900"
             />
           )}
         </div>
       ))}
-      {err && <p className="text-sm text-red-500">{err}</p>}
-      <div className="flex gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 rounded-xl border border-zinc-200 bg-white py-2.5 text-sm font-medium transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-        >
+      {err && <p className="text-[12.5px] text-destructive">{err}</p>}
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           取消
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 rounded-xl bg-zinc-900 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-        >
+        </Button>
+        <Button type="submit" size="sm" disabled={loading}>
           {loading ? '保存中…' : '保存'}
-        </button>
+        </Button>
       </div>
     </form>
   )
