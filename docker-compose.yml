@@ -1,0 +1,17 @@
+services:
+  account-vault:
+    image: ${IMAGE:-ghcr.io/lemonzuo/account-vault:latest}
+    container_name: account-vault
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_CHARSET: ${DB_CHARSET:-utf8mb4}
+      SERVER_ADDR: ":8080"
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
