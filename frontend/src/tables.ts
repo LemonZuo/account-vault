@@ -32,7 +32,7 @@ export const tables: TableDef[] = [
     label: 'Apple',
     path: 'apple',
     icon: '',
-    color: 'slate',
+    color: 'blue',
     titleKeys: ['mail'],
     subtitleKeys: ['phone', 'remark'],
     hasId: true,

@@ -17,6 +17,13 @@ export const colorMap: Record<string, ColorSet> = {
     border: 'border-l-slate-400',
     ring: 'ring-slate-300',
   },
+  blue: {
+    dot: 'bg-blue-500',
+    chip: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300',
+    avatar: 'bg-gradient-to-br from-blue-400 to-indigo-600',
+    border: 'border-l-blue-500',
+    ring: 'ring-blue-300',
+  },
   emerald: {
     dot: 'bg-emerald-500',
     chip: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',

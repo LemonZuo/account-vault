@@ -94,12 +94,11 @@ export default function TableView() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:pt-10 sm:px-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div className="mx-auto max-w-5xl px-4 pb-32 pt-4 sm:pt-10 sm:px-8">
+      {/* 桌面端：大标题 + chip + 工具栏 */}
+      <div className="mb-6 hidden flex-wrap items-center justify-between gap-3 sm:flex">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">
-            {def.label}
-          </h1>
+          <h1 className="text-[28px] font-bold tracking-tight">{def.label}</h1>
           <span
             className={clsx(
               'rounded-full px-2.5 py-0.5 text-xs font-medium',
@@ -124,12 +123,36 @@ export default function TableView() {
           </div>
           <button
             onClick={onAdd}
-            className="hidden items-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 sm:flex dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+            className="flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
           >
             <Plus size={15} />
             新增
           </button>
         </div>
+      </div>
+
+      {/* 移动端：搜索框占满 + 数量 chip */}
+      <div className="mb-4 flex items-center gap-2 sm:hidden">
+        <div className="relative flex-1">
+          <Search
+            size={15}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+          />
+          <input
+            value={kw}
+            onChange={(e) => setKw(e.target.value)}
+            placeholder={`搜索 ${filtered.length} 条记录…`}
+            className="w-full rounded-xl border border-zinc-200 bg-white/80 py-2.5 pl-8 pr-3 text-sm shadow-sm outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60"
+          />
+        </div>
+        <span
+          className={clsx(
+            'shrink-0 rounded-full px-2.5 py-1 text-xs font-medium',
+            cs.chip,
+          )}
+        >
+          {filtered.length}
+        </span>
       </div>
 
       {loading ? (
