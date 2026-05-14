@@ -12,6 +12,8 @@ export interface TableDef {
   label: string
   path: string // API 路径，不含 /api/
   icon: string // emoji 占位
+  // 主题色（tailwind 色名 + 用于 dot 与高亮）
+  color: string
   // 卡片标题字段（取第一个非空）
   titleKeys: string[]
   // 卡片副标题字段
@@ -20,6 +22,8 @@ export interface TableDef {
   fields: Field[]
   // 是否有自增 ID
   hasId: boolean
+  // 长文本字段：默认折叠
+  longFields?: string[]
 }
 
 export const tables: TableDef[] = [
@@ -28,6 +32,7 @@ export const tables: TableDef[] = [
     label: 'Apple',
     path: 'apple',
     icon: '',
+    color: 'slate',
     titleKeys: ['mail'],
     subtitleKeys: ['phone', 'remark'],
     hasId: true,
@@ -35,7 +40,7 @@ export const tables: TableDef[] = [
       { key: 'mail', label: '邮箱', placeholder: 'xxx@icloud.com' },
       { key: 'sub_mail', label: '备用邮箱' },
       { key: 'password', label: '密码', type: 'password' },
-      { key: 'phone', label: '电话/Token' },
+      { key: 'phone', label: '号码' },
       { key: 'remark', label: '备注', type: 'textarea' },
     ],
   },
@@ -44,13 +49,15 @@ export const tables: TableDef[] = [
     label: 'OpenAI',
     path: 'openai',
     icon: '',
+    color: 'emerald',
+    longFields: ['refresh_token'],
     titleKeys: ['mail'],
     subtitleKeys: ['tag'],
     hasId: true,
     fields: [
       { key: 'mail', label: '邮箱' },
       { key: 'password', label: '密码', type: 'password' },
-      { key: 'refresh_token', label: 'Refresh Token', type: 'textarea' },
+      { key: 'refresh_token', label: '刷新令牌', type: 'textarea' },
       { key: 'tag', label: '标签' },
     ],
   },
@@ -59,6 +66,7 @@ export const tables: TableDef[] = [
     label: 'IDC Flare',
     path: 'idc-flare',
     icon: '',
+    color: 'orange',
     titleKeys: ['user_name', 'mail'],
     subtitleKeys: ['mail'],
     hasId: true,
@@ -73,6 +81,7 @@ export const tables: TableDef[] = [
     label: 'Linux.do',
     path: 'linux-do',
     icon: '',
+    color: 'sky',
     titleKeys: ['user_name', 'mail'],
     subtitleKeys: ['mail', 'chrome_profile'],
     hasId: true,
@@ -80,7 +89,7 @@ export const tables: TableDef[] = [
       { key: 'mail', label: '邮箱' },
       { key: 'user_name', label: '用户名' },
       { key: 'passwd', label: '密码', type: 'password' },
-      { key: 'chrome_profile', label: 'Chrome Profile' },
+      { key: 'chrome_profile', label: '个人资料' },
     ],
   },
   {
@@ -88,6 +97,7 @@ export const tables: TableDef[] = [
     label: '宽带账户',
     path: 'network',
     icon: '',
+    color: 'amber',
     titleKeys: ['account'],
     subtitleKeys: ['bandwidth', 'desc'],
     hasId: true,
@@ -106,6 +116,7 @@ export const tables: TableDef[] = [
     label: '软件账号',
     path: 'soft-account',
     icon: '',
+    color: 'rose',
     titleKeys: ['user', 'type'],
     subtitleKeys: ['type', 'remark'],
     hasId: true,
@@ -121,6 +132,7 @@ export const tables: TableDef[] = [
     label: '中间件账号',
     path: 'middleware-account',
     icon: '',
+    color: 'violet',
     titleKeys: ['type', 'public_ip'],
     subtitleKeys: ['public_ip', 'port', 'user'],
     hasId: false,

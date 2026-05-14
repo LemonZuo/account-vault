@@ -14,12 +14,24 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: #fafaf9;
   color: #18181b;
 }
 
+body {
+  background:
+    radial-gradient(1200px 600px at 100% 0%, rgba(168, 85, 247, 0.07), transparent 60%),
+    radial-gradient(900px 600px at 0% 100%, rgba(16, 185, 129, 0.05), transparent 60%),
+    #fafaf9;
+}
+
 @media (prefers-color-scheme: dark) {
-  html, body, #root { background: #0c0a09; color: #fafaf9; }
+  html, body, #root { color: #fafaf9; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 100% 0%, rgba(168, 85, 247, 0.10), transparent 60%),
+      radial-gradient(900px 600px at 0% 100%, rgba(16, 185, 129, 0.06), transparent 60%),
+      #0c0a09;
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

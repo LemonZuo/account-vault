@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, Search, Loader2 } from 'lucide-react'
+import clsx from 'clsx'
 import { api } from '../api'
 import { getTable } from '../tables'
+import { getColorSet } from '../colors'
 import RecordCard from './RecordCard'
 import RecordForm from './RecordForm'
 import Modal from './Modal'
@@ -37,6 +39,8 @@ export default function TableView() {
 
   if (!def) return <div className="p-6 text-zinc-500">未找到该表</div>
 
+  const cs = getColorSet(def.color)
+
   const filtered = records.filter((r) => {
     if (!kw) return true
     const s = kw.toLowerCase()
@@ -62,7 +66,6 @@ export default function TableView() {
         await api.post(`/${def.path}`, data)
       }
     } else {
-      // middleware_account：复合主键
       if (editing) {
         await api.put(`/${def.path}`, {
           _orig_public_ip: editing.public_ip,
@@ -91,36 +94,42 @@ export default function TableView() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:pt-10">
-      <div className="mb-6 flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+    <div className="mx-auto max-w-5xl px-4 pb-32 pt-6 sm:pt-10 sm:px-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-[28px]">
             {def.label}
           </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            共 {filtered.length} 条记录
-          </p>
+          <span
+            className={clsx(
+              'rounded-full px-2.5 py-0.5 text-xs font-medium',
+              cs.chip,
+            )}
+          >
+            {filtered.length}
+          </span>
         </div>
-        <button
-          onClick={onAdd}
-          className="hidden items-center gap-1.5 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 sm:flex dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-        >
-          <Plus size={16} />
-          新增
-        </button>
-      </div>
-
-      <div className="mb-5 relative">
-        <Search
-          size={16}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
-        />
-        <input
-          value={kw}
-          onChange={(e) => setKw(e.target.value)}
-          placeholder="搜索…"
-          className="w-full rounded-2xl border border-zinc-200 bg-white/80 py-3 pl-10 pr-4 text-sm shadow-sm outline-none backdrop-blur transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60"
-        />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            />
+            <input
+              value={kw}
+              onChange={(e) => setKw(e.target.value)}
+              placeholder="搜索…"
+              className="w-44 rounded-xl border border-zinc-200 bg-white/80 py-2 pl-8 pr-3 text-sm shadow-sm outline-none transition focus:w-60 focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60"
+            />
+          </div>
+          <button
+            onClick={onAdd}
+            className="hidden items-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 sm:flex dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+          >
+            <Plus size={15} />
+            新增
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -128,11 +137,11 @@ export default function TableView() {
           <Loader2 className="animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-200 py-16 text-center text-sm text-zinc-400 dark:border-zinc-800">
+        <div className="rounded-2xl border border-dashed border-zinc-200 py-20 text-center text-sm text-zinc-400 dark:border-zinc-800">
           {kw ? '没有匹配的记录' : '暂无数据，点击右下角 + 添加'}
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((r, i) => (
             <RecordCard
               key={def.hasId ? r.id : `${r.public_ip}-${r.port}-${r.type}-${i}`}
@@ -145,10 +154,9 @@ export default function TableView() {
         </div>
       )}
 
-      {/* 移动端浮动按钮 */}
       <button
         onClick={onAdd}
-        className="fixed bottom-24 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg transition hover:scale-105 active:scale-95 sm:hidden dark:bg-white dark:text-zinc-900"
+        className="fixed bottom-24 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/30 transition hover:scale-105 active:scale-95 sm:hidden dark:bg-white dark:text-zinc-900"
       >
         <Plus size={22} />
       </button>
