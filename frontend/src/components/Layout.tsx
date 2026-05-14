@@ -104,11 +104,11 @@ export default function Layout() {
 
       {/* 移动端表切换：底部弹起 Drawer */}
       <Drawer open={pickerOpen} onOpenChange={setPickerOpen}>
-        <DrawerContent className="sm:hidden h-[60vh]">
+        <DrawerContent className="sm:hidden overflow-hidden">
           <DrawerHeader className="pb-2">
             <DrawerTitle>切换表</DrawerTitle>
           </DrawerHeader>
-          <div className="flex-1 overflow-y-auto px-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div className="min-h-0 overflow-y-auto px-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {tables.map((t) => {
               const cs = getColorSet(t.color)
               const active = t.key === current.key
