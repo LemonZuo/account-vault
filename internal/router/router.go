@@ -53,7 +53,7 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 	handler.NewCRUD[model.LinuxDo](db).Register(api, "/linux-do")
 	handler.NewCRUD[model.Network](db).Register(api, "/network")
 	handler.NewCRUD[model.SoftAccount](db).Register(api, "/soft-account")
-	handler.NewComponentsAccountHandler(db).Register(api)
+	handler.NewCRUD[model.ComponentsAccount](db).Register(api, "/components-account")
 	handler.NewMiddlewareAccountHandler(db).Register(api)
 
 	// 前端单页：未命中 /api/* 的请求都交给 embed 出来的 dist

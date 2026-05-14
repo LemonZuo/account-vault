@@ -147,7 +147,7 @@ export const tables: TableDef[] = [
     color: 'teal',
     titleKeys: ['type', 'public_ip'],
     subtitleKeys: ['public_ip', 'port', 'user'],
-    hasId: false,
+    hasId: true,
     fields: [
       { key: 'public_ip', label: '公网 IP' },
       { key: 'locla_ip', label: '内网 IP' },
