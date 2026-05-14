@@ -44,7 +44,7 @@ jobs:
           if-no-files-found: error
 
   build:
-    name: Build Binaries (amd64 + arm64)
+    name: Binaries
     needs: frontend
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
-      - name: Cross-compile (CGO disabled, host build)
+      - name: Build
         env:
           CGO_ENABLED: '0'
           GOOS: linux
@@ -78,10 +78,10 @@ jobs:
           done
           ls -la dist
 
-      - name: Generate md5 checksums
+      - name: Checksums
         working-directory: dist
         run: |
-          md5sum server-linux-* | tee MD5SUMS.txt
+          sha256sum server-linux-* | tee sha256sums.txt
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
@@ -192,7 +192,7 @@ jobs:
           files: |
             dist/server-linux-amd64
             dist/server-linux-arm64
-            dist/MD5SUMS.txt
+            dist/sha256sums.txt
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
