@@ -46,7 +46,7 @@ account-vault/
    go build -o bin/server . && ./bin/server
    ```
 
-   服务默认监听 `:8080`，可在 `.env` 中改 `SERVER_ADDR`。
+   服务默认监听 `http://0.0.0.0:8080`，可在 `.env` 中改 `SERVER_PORT`。
 
 ## 前端启动
 

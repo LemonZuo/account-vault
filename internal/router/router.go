@@ -4,7 +4,6 @@ import (
 	"io/fs"
 	"strings"
 
-	"account-vault/internal/config"
 	"account-vault/internal/handler"
 	"account-vault/internal/model"
 	"account-vault/internal/web"
@@ -31,13 +30,12 @@ var Tables = []TableMeta{
 	{Key: "middleware_account", Label: "中间件账号", Path: "middleware-account"},
 }
 
-func Setup(cfg *config.Config, db *gorm.DB, frontend fs.FS) *gin.Engine {
+func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{cfg.CORSOrigin, "http://localhost:5173", "http://127.0.0.1:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		AllowCredentials: true,
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization"},
 	}))
 
 	api := r.Group("/api")

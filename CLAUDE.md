@@ -74,7 +74,7 @@ account-vault/
 ## 开发
 
 ```sh
-# 后端（端口默认 :8080，可在 .env 改）
+# 后端（端口默认 8080，可在 .env 的 SERVER_PORT 改）
 export PATH=/opt/module/go/go1.25.0/bin:$PATH
 cp .env.example .env   # 填好 MySQL 连接
 go run .

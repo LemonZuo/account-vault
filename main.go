@@ -26,9 +26,9 @@ func main() {
 		log.Fatalf("sub frontend/dist: %v", err)
 	}
 
-	r := router.Setup(cfg, gormDB, dist)
-	log.Printf("server listening on %s", cfg.ServerAddr)
-	if err := r.Run(cfg.ServerAddr); err != nil {
+	r := router.Setup(gormDB, dist)
+	log.Printf("server listening on %s", cfg.ListenURL())
+	if err := r.Run(cfg.ListenAddr()); err != nil {
 		log.Fatalf("run server: %v", err)
 	}
 }

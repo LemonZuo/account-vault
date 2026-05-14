@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -14,8 +15,7 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBCharset  string
-	ServerAddr string
-	CORSOrigin string
+	ServerPort string
 }
 
 func Load() *Config {
@@ -27,8 +27,7 @@ func Load() *Config {
 		DBPassword: env("DB_PASSWORD", ""),
 		DBName:     env("DB_NAME", ""),
 		DBCharset:  env("DB_CHARSET", "utf8mb4"),
-		ServerAddr: env("SERVER_ADDR", ":8080"),
-		CORSOrigin: env("CORS_ORIGIN", "*"),
+		ServerPort: normalizePort(env("SERVER_PORT", "8080")),
 	}
 }
 
@@ -37,9 +36,26 @@ func (c *Config) DSN() string {
 		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.DBCharset)
 }
 
+func (c *Config) ListenAddr() string {
+	return ":" + normalizePort(c.ServerPort)
+}
+
+func (c *Config) ListenURL() string {
+	return "http://0.0.0.0:" + normalizePort(c.ServerPort)
+}
+
 func env(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
 	}
 	return def
+}
+
+func normalizePort(port string) string {
+	port = strings.TrimSpace(port)
+	port = strings.TrimPrefix(port, ":")
+	if port == "" {
+		return "8080"
+	}
+	return port
 }
