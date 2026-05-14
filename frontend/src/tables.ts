@@ -22,8 +22,6 @@ export interface TableDef {
   fields: Field[]
   // 是否有自增 ID
   hasId: boolean
-  // 长文本字段：默认折叠
-  longFields?: string[]
 }
 
 export const tables: TableDef[] = [
@@ -50,7 +48,6 @@ export const tables: TableDef[] = [
     path: 'openai',
     icon: '',
     color: 'emerald',
-    longFields: ['refresh_token'],
     titleKeys: ['mail'],
     subtitleKeys: ['tag'],
     hasId: true,

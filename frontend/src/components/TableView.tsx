@@ -176,6 +176,7 @@ export default function TableView() {
           {filtered.map((r, i) => (
             <motion.div
               key={def.hasId ? r.id : `${r.public_ip}-${r.port}-${r.type}-${i}`}
+              className="h-full"
               variants={{
                 hidden: { opacity: 0, y: 8 },
                 visible: {

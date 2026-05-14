@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, Pencil, Trash2, ChevronDown } from 'lucide-react'
+import { Copy, Check, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { TableDef } from '../tables'
 import { avatarColor, getColorSet } from '../colors'
@@ -24,7 +24,6 @@ function pickFirst(r: Record<string, any>, keys: string[]): string {
 }
 
 export default function RecordCard({ record, def, onEdit, onDelete }: Props) {
-  const [expand, setExpand] = useState<Record<string, boolean>>({})
   const [copied, setCopied] = useState<string | null>(null)
 
   const title = pickFirst(record, def.titleKeys) || '(无标题)'
@@ -48,12 +47,10 @@ export default function RecordCard({ record, def, onEdit, onDelete }: Props) {
     }
   }
 
-  const toggle = (k: string) => setExpand((p) => ({ ...p, [k]: !p[k] }))
-
   return (
     <Card
       className={cn(
-        'group relative overflow-hidden transition-[transform,box-shadow,border-color] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform hover:-translate-y-1',
+        'group relative flex h-full flex-col overflow-hidden transition-[transform,box-shadow,border-color] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform hover:-translate-y-1',
         cs.border,
         cs.halo,
       )}
@@ -114,36 +111,18 @@ export default function RecordCard({ record, def, onEdit, onDelete }: Props) {
           const v = record[f.key]
           const empty = v === undefined || v === null || String(v).trim() === ''
           const s = empty ? '' : String(v)
-          const isLong = !empty && (def.longFields?.includes(f.key) || s.length > 60)
-          const expanded = expand[f.key]
           return (
-            <div key={f.key} className="group/row flex items-start gap-3 py-1 text-[12.5px]">
-              <span className="w-14 shrink-0 pt-0.5 text-muted-foreground">
-                {f.label}
-              </span>
+            <div key={f.key} className="group/row flex items-center gap-3 py-1 text-[12.5px]">
+              <span className="w-14 shrink-0 text-muted-foreground">{f.label}</span>
               {empty ? (
-                <span className="flex-1 min-w-0 pt-0.5 text-muted-foreground/70">—</span>
+                <span className="flex-1 min-w-0 text-muted-foreground/70">—</span>
               ) : (
                 <span
-                  className={cn(
-                    'flex-1 min-w-0 pt-0.5 font-mono text-[12.5px] leading-relaxed',
-                    isLong && !expanded ? 'truncate' : 'break-all',
-                  )}
+                  className="flex-1 min-w-0 truncate font-mono text-[12.5px] leading-relaxed"
+                  title={s}
                 >
                   {s}
                 </span>
-              )}
-              {isLong && (
-                <button
-                  type="button"
-                  onClick={() => toggle(f.key)}
-                  className="shrink-0 rounded p-0.5 text-muted-foreground transition hover:text-foreground"
-                  title={expanded ? '收起' : '展开'}
-                >
-                  <ChevronDown
-                    className={cn('h-3.5 w-3.5 transition', expanded && 'rotate-180')}
-                  />
-                </button>
               )}
               {!empty && (
                 <button
