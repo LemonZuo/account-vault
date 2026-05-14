@@ -20,12 +20,31 @@ function useCurrentTable() {
   return tables.find((t) => t.key === key) ?? tables[0]
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(query).matches,
+  )
+
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const onChange = () => setMatches(media.matches)
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [query])
+
+  return matches
+}
+
 export default function Layout() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const widePicker = useMediaQuery('(min-width: 430px)')
   const current = useCurrentTable()
   const navigate = useNavigate()
   const currentCs = getColorSet(current.color)
+  const pickerColumns = widePicker ? 3 : 2
+  const pickerTail = tables.length % pickerColumns
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -108,10 +127,21 @@ export default function Layout() {
           <DrawerHeader className="pb-2">
             <DrawerTitle>切换表</DrawerTitle>
           </DrawerHeader>
-          <div className="min-h-0 overflow-y-auto px-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            {tables.map((t) => {
+          <div className="grid min-h-0 grid-cols-6 gap-2 overflow-y-auto px-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            {tables.map((t, index) => {
               const cs = getColorSet(t.color)
               const active = t.key === current.key
+              const remaining = tables.length - index
+              const singleTail = pickerTail === 1 && remaining === 1
+              const pairTail = pickerColumns === 3 && pickerTail === 2 && remaining <= 2
+              const centered = singleTail || pairTail
+              const spanClass = singleTail
+                ? 'col-span-6'
+                : pairTail
+                  ? 'col-span-3'
+                  : pickerColumns === 3
+                    ? 'col-span-2'
+                    : 'col-span-3'
               return (
                 <button
                   key={t.key}
@@ -120,13 +150,23 @@ export default function Layout() {
                     setPickerOpen(false)
                   }}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[14px] transition-colors',
-                    active ? 'bg-accent font-medium' : 'active:bg-accent/60',
+                    'flex h-11 w-full min-w-0 items-center gap-2 rounded-lg border px-3 text-left text-[14px] transition-[background-color,border-color,box-shadow,transform] active:scale-[0.98]',
+                    spanClass,
+                    centered && 'justify-center',
+                    active
+                      ? cn(cs.picker, 'font-semibold shadow-sm')
+                      : 'border-transparent active:bg-accent/60',
                   )}
                 >
                   <span className={cn('h-2 w-2 shrink-0 rounded-full', cs.dot)} />
-                  <span className="flex-1">{t.label}</span>
-                  {active && <Check className="h-4 w-4 text-foreground" />}
+                  <span className={cn('min-w-0 truncate', centered ? 'flex-none' : 'flex-1')}>
+                    {t.label}
+                  </span>
+                  {active && (
+                    <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white shadow-sm', cs.dot)}>
+                      <Check className="h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </button>
               )
             })}
