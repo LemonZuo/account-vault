@@ -44,9 +44,13 @@ jobs:
           if-no-files-found: error
 
   build:
-    name: Binaries
+    name: Build ${{ matrix.arch }}
     needs: frontend
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        arch: [amd64, arm64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,26 +81,45 @@ jobs:
         env:
           CGO_ENABLED: '0'
           GOOS: linux
+          GOARCH: ${{ matrix.arch }}
           VERSION: ${{ steps.ver.outputs.version }}
           COMMIT: ${{ steps.ver.outputs.commit }}
         run: |
           mkdir -p dist
           PKG=github.com/LemonZuo/account-vault/internal/buildinfo
-          for arch in amd64 arm64; do
-            echo "==> building $arch"
-            GOARCH=$arch go build \
-              -trimpath \
-              -ldflags="-s -w -X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT}" \
-              -o "dist/server-linux-${arch}" .
-          done
+          go build \
+            -trimpath \
+            -ldflags="-s -w -X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT}" \
+            -o "dist/server-linux-${GOARCH}" .
           ls -la dist
 
-      - name: Checksums
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-linux-${{ matrix.arch }}
+          path: dist/server-linux-${{ matrix.arch }}
+          retention-days: 7
+          if-no-files-found: error
+
+  checksums:
+    name: Checksums
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: server-linux-*
+          path: dist
+          merge-multiple: true
+
+      - name: Compute sha256sums
         working-directory: dist
         run: |
           sha256sum server-linux-* | tee sha256sums.txt
+          ls -la
 
-      - name: Upload binaries
+      - name: Upload combined artifact
         uses: actions/upload-artifact@v4
         with:
           name: binaries
@@ -106,7 +129,7 @@ jobs:
 
   docker:
     name: Build & Push Docker Images
-    needs: build
+    needs: checksums
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -186,7 +209,7 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: [build, docker]
+    needs: [checksums, docker]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
