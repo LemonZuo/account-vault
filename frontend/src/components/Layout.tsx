@@ -12,6 +12,7 @@ import {
   DrawerTitle,
 } from './ui/drawer'
 import CommandPalette from './CommandPalette'
+import { Logo } from './Logo'
 import { api } from '../api'
 
 function useAppVersion() {
@@ -82,14 +83,18 @@ export default function Layout() {
     <div className="flex min-h-screen flex-col sm:flex-row">
       {/* 桌面端侧栏 */}
       <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-card/40 px-3 py-6 backdrop-blur-sm sm:flex">
-        <div className="mb-6 flex items-center justify-between px-3">
-          <div>
-            <div className="text-[13px] font-semibold tracking-tight">Vault</div>
-            <div className="text-[11px] text-muted-foreground">凭证管理</div>
-          </div>
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
-            V
+        <div className="mb-6 flex items-center gap-2.5 px-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <Logo className="h-5 w-5" />
           </span>
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-[13px] font-semibold tracking-tight">
+              Account Vault
+            </div>
+            <div className="truncate text-[11px] text-muted-foreground">
+              凭证保管箱
+            </div>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto">
