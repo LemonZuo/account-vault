@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { tables } from '../tables'
 import { getColorSet } from '../colors'
-import { ChevronDown, Check, Command as CmdIcon } from 'lucide-react'
+import { Check, Command as CmdIcon, LayoutGrid } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { Kbd } from './ui/kbd'
 import {
@@ -140,16 +140,12 @@ export default function Layout() {
 
       {/* 移动端顶栏 */}
       <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-background/85 px-4 py-3 backdrop-blur-md sm:hidden">
-        <button
-          onClick={() => setPickerOpen(true)}
-          className="-mx-1.5 flex min-w-0 items-center gap-2 rounded-md px-1.5 py-1 outline-none transition active:bg-accent"
-        >
+        <div className="flex min-w-0 items-center gap-2">
           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', currentCs.dot)} />
           <span className="truncate text-[15px] font-semibold tracking-tight">
             {current.label}
           </span>
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-        </button>
+        </div>
         {displayVersion ? (
           <span className="font-mono text-[10.5px] tabular-nums text-muted-foreground/70">
             {displayVersion}
@@ -158,6 +154,22 @@ export default function Layout() {
           <span />
         )}
       </header>
+
+      {/* 移动端切换表 FAB：与右下角新增 FAB 对称 */}
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        aria-label="切换表"
+        className="fixed bottom-[5.5rem] right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-lg transition-transform active:scale-95 sm:hidden"
+      >
+        <LayoutGrid className="h-5 w-5" />
+        <span
+          className={cn(
+            'absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full ring-2 ring-card',
+            currentCs.dot,
+          )}
+        />
+      </button>
 
       {/* 移动端表切换：底部弹起 Drawer */}
       <Drawer open={pickerOpen} onOpenChange={setPickerOpen}>
