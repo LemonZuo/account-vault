@@ -62,7 +62,7 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 	handler.NewCRUD[model.Network](db).Register(api, "/network")
 	handler.NewCRUD[model.SoftAccount](db).Register(api, "/soft-account")
 	handler.NewCRUD[model.ComponentsAccount](db).Register(api, "/components-account")
-	handler.NewMiddlewareAccountHandler(db).Register(api)
+	handler.NewCRUD[model.MiddlewareAccount](db).Register(api, "/middleware-account")
 
 	// 前端单页：未命中 /api/* 的请求都交给 embed 出来的 dist
 	spa := web.SPAHandler(frontend)

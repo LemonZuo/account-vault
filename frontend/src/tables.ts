@@ -20,8 +20,6 @@ export interface TableDef {
   subtitleKeys: string[]
   // 表单字段
   fields: Field[]
-  // 是否有自增 ID
-  hasId: boolean
 }
 
 export const tables: TableDef[] = [
@@ -33,7 +31,6 @@ export const tables: TableDef[] = [
     color: 'blue',
     titleKeys: ['mail'],
     subtitleKeys: ['phone', 'remark'],
-    hasId: true,
     fields: [
       { key: 'mail', label: '邮箱', placeholder: 'xxx@icloud.com' },
       { key: 'sub_mail', label: '备用邮箱' },
@@ -50,7 +47,6 @@ export const tables: TableDef[] = [
     color: 'emerald',
     titleKeys: ['mail'],
     subtitleKeys: ['tag'],
-    hasId: true,
     fields: [
       { key: 'mail', label: '邮箱' },
       { key: 'password', label: '密码', type: 'password' },
@@ -66,7 +62,6 @@ export const tables: TableDef[] = [
     color: 'claude',
     titleKeys: ['mail'],
     subtitleKeys: ['area'],
-    hasId: true,
     fields: [
       { key: 'mail', label: '邮箱' },
       { key: 'session_key', label: '会话密钥', type: 'password' },
@@ -81,7 +76,6 @@ export const tables: TableDef[] = [
     color: 'orange',
     titleKeys: ['user_name', 'mail'],
     subtitleKeys: ['mail'],
-    hasId: true,
     fields: [
       { key: 'mail', label: '邮箱' },
       { key: 'user_name', label: '用户名' },
@@ -96,7 +90,6 @@ export const tables: TableDef[] = [
     color: 'sky',
     titleKeys: ['user_name', 'mail'],
     subtitleKeys: ['mail', 'chrome_profile'],
-    hasId: true,
     fields: [
       { key: 'mail', label: '邮箱' },
       { key: 'user_name', label: '用户名' },
@@ -112,7 +105,6 @@ export const tables: TableDef[] = [
     color: 'amber',
     titleKeys: ['account'],
     subtitleKeys: ['bandwidth', 'desc'],
-    hasId: true,
     fields: [
       { key: 'account', label: '账户' },
       { key: 'password', label: '密码', type: 'password' },
@@ -131,7 +123,6 @@ export const tables: TableDef[] = [
     color: 'rose',
     titleKeys: ['user', 'type'],
     subtitleKeys: ['type', 'remark'],
-    hasId: true,
     fields: [
       { key: 'type', label: '类型', placeholder: 'GitHub / Adobe ...' },
       { key: 'user', label: '用户' },
@@ -147,7 +138,6 @@ export const tables: TableDef[] = [
     color: 'teal',
     titleKeys: ['type', 'public_ip'],
     subtitleKeys: ['public_ip', 'port', 'user'],
-    hasId: true,
     fields: [
       { key: 'public_ip', label: '公网 IP' },
       { key: 'locla_ip', label: '内网 IP' },
@@ -167,7 +157,6 @@ export const tables: TableDef[] = [
     color: 'violet',
     titleKeys: ['type', 'public_ip'],
     subtitleKeys: ['public_ip', 'port', 'user'],
-    hasId: false,
     fields: [
       { key: 'public_ip', label: '公网 IP' },
       { key: 'locla_ip', label: '内网 IP' },

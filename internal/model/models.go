@@ -72,12 +72,12 @@ type SoftAccount struct {
 
 func (SoftAccount) TableName() string { return "tb_soft_account" }
 
-// MiddlewareAccount 无自增主键，用 public_ip+port+type 作为业务主键定位
 type MiddlewareAccount struct {
-	PublicIP string `gorm:"primaryKey;column:public_ip" json:"public_ip"`
+	ID       int    `gorm:"primaryKey;column:id" json:"id"`
+	PublicIP string `gorm:"column:public_ip" json:"public_ip"`
 	LoclaIP  string `gorm:"column:locla_ip" json:"locla_ip"`
-	Port     string `gorm:"primaryKey;column:port" json:"port"`
-	Type     string `gorm:"primaryKey;column:type" json:"type"`
+	Port     string `gorm:"column:port" json:"port"`
+	Type     string `gorm:"column:type" json:"type"`
 	User     string `gorm:"column:user" json:"user"`
 	Password string `gorm:"column:password" json:"password"`
 	Remark   string `gorm:"column:remark" json:"remark"`

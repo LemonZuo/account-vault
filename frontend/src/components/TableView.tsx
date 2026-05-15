@@ -73,23 +73,10 @@ export default function TableView() {
   }
 
   const onSubmit = async (data: Record<string, any>) => {
-    if (def.hasId) {
-      if (editing && editing.id) {
-        await api.put(`/${def.path}/${editing.id}`, data)
-      } else {
-        await api.post(`/${def.path}`, data)
-      }
+    if (editing && editing.id) {
+      await api.put(`/${def.path}/${editing.id}`, data)
     } else {
-      if (editing) {
-        await api.put(`/${def.path}`, {
-          _orig_public_ip: editing.public_ip,
-          _orig_port: editing.port,
-          _orig_type: editing.type,
-          data,
-        })
-      } else {
-        await api.post(`/${def.path}`, data)
-      }
+      await api.post(`/${def.path}`, data)
     }
     setModalOpen(false)
     await load()
@@ -99,13 +86,7 @@ export default function TableView() {
     const r = pendingDelete
     if (!r) return
     setPendingDelete(null)
-    if (def.hasId) {
-      await api.delete(`/${def.path}/${r.id}`)
-    } else {
-      await api.delete(`/${def.path}`, {
-        params: { public_ip: r.public_ip, port: r.port, type: r.type },
-      })
-    }
+    await api.delete(`/${def.path}/${r.id}`)
     await load()
   }
 
@@ -173,9 +154,9 @@ export default function TableView() {
             hidden: {},
           }}
         >
-          {filtered.map((r, i) => (
+          {filtered.map((r) => (
             <motion.div
-              key={def.hasId ? r.id : `${r.public_ip}-${r.port}-${r.type}-${i}`}
+              key={r.id}
               className="h-full"
               variants={{
                 hidden: { opacity: 0, y: 8 },
