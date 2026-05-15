@@ -160,7 +160,7 @@ export default function Layout() {
         type="button"
         onClick={() => setPickerOpen(true)}
         aria-label="切换表"
-        className="fixed bottom-[5.5rem] right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-lg transition-transform active:scale-95 sm:hidden"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+10.5rem)] right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-lg transition-transform active:scale-95 sm:hidden"
       >
         <LayoutGrid className="h-5 w-5" />
         <span

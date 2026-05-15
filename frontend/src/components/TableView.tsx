@@ -201,7 +201,7 @@ export default function TableView() {
       <Button
         size="icon"
         onClick={onAdd}
-        className="fixed bottom-6 right-5 z-30 h-12 w-12 rounded-full shadow-lg active:scale-95 sm:hidden"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+6rem)] right-5 z-30 h-12 w-12 rounded-full shadow-lg active:scale-95 sm:hidden"
         aria-label="新增"
       >
         <Plus className="h-5 w-5" />
