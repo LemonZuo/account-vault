@@ -12,8 +12,8 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
       aria-hidden="true"
       {...props}
     >
-      <path d="M12 1.5 20 4v7c0 5-3.6 9.4-8 11-4.4-1.6-8-6-8-11V4z" />
-      <path d="m7.05 8.65 4.95 7.7 4.95-7.7" />
+      <path d="M12 0.9 21.2 3.2v8.3c0 5.3-3.5 8.2-9.2 10.8-5.6-2.1-9.2-5-9.2-10.8V3.2z" />
+      <path d="m7 8 5 8 5-8" />
     </svg>
   )
 }
