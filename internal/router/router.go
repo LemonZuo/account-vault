@@ -41,6 +41,8 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 		AllowHeaders:    []string{"Origin", "Content-Type", "Accept", "Authorization"},
 	}))
 
+	r.GET("/healthz", handler.Health(db))
+
 	api := r.Group("/api")
 
 	api.GET("/tables", func(c *gin.Context) {
