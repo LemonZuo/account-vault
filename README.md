@@ -10,7 +10,8 @@ account-vault/
 ├── main.go
 ├── go.mod / go.sum
 ├── .env / .env.example
-├── internal/{config,db,handler,model,router,web}
+├── cliff.toml
+├── internal/{buildinfo,config,db,handler,logx,model,router,web}
 └── frontend/
     ├── dist/
     └── src/{App.tsx, components, tables.ts, api.ts}
@@ -32,7 +33,7 @@ account-vault/
    go build -o bin/server . && ./bin/server
    ```
 
-   服务默认监听 `http://0.0.0.0:8080`，可在 `.env` 中改 `SERVER_PORT`。
+   服务默认监听 `http://0.0.0.0:8080`，可在 `.env` 中改 `SERVER_PORT`；日志级别由 `LOG_LEVEL`（debug/info/warn/error）控制。
 
 ## 前端启动
 
@@ -56,9 +57,25 @@ go build -o bin/server .
 ## API
 
 后端提供前端所需的数据读写能力。具体数据细节以代码与实际部署配置为准，README 不展开。
+`GET /api/version` 返回 `version` / `commit` / `build_id`（ldflags 注入，默认 `dev` / `unknown` / `none`）。
+
+## 测试与钩子
+
+```sh
+go test ./internal/...   # logx + config 两块
+```
+
+可选启用 pre-commit 门禁（`.githooks/pre-commit`，本地配置不入库）：
+
+```sh
+git config core.hooksPath .githooks
+```
+
+只对 staged `.go` 文件跑 `gofmt -l` + 全仓 `go vet ./...`。
 
 ## 设计要点
 
 - **部署边界**：默认面向可信网络环境；如需公网暴露，应在外层增加访问控制。
 - **响应式**：≥640px 显示左侧固定导航；移动端顶栏 + 底部横向滚动 tab。
 - **新增/编辑**：底部弹起的卡片式 Modal，移动端体验接近原生 sheet。
+- **日志**：统一 `internal/logx`（slog + 可读 handler），gorm 错误/慢 SQL(>300ms) 自动分级到 logx，`LOG_LEVEL=debug` 时打印每条 SQL。

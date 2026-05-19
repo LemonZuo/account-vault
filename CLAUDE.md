@@ -21,13 +21,18 @@ account-vault/
 ├── main.go
 ├── go.mod / go.sum
 ├── .env / .env.example
+├── cliff.toml          # git-cliff 配置，按 conventional commit 前缀分组生成 release notes
 ├── internal/
+│   ├── buildinfo/      # Version / Commit / BuildID（ldflags 注入），/api/version 暴露
 │   ├── config/
-│   ├── db/
+│   ├── db/             # gorm logger 走 logx.NewGormLogger
+│   ├── handler/        # 仅 crud.go 一个通用 CRUD，9 张表共用
+│   ├── logx/           # slog + 自定义可读 handler + GORM 桥接，LOG_LEVEL 控级别
 │   ├── model/
-│   ├── handler/
 │   ├── router/
 │   └── web/
+├── .github/workflows/  # release.yml：matrix amd64/arm64 → checksums → docker → release(git-cliff)
+├── .githooks/          # pre-commit：staged .go 文件 gofmt + go vet（本地启用，见下）
 └── frontend/
     ├── dist/
     └── src/
@@ -67,7 +72,8 @@ cd frontend && npm install && npm run build
 # 2. 后端构建（embed 进 bin/server，单文件分发）
 cd ..
 export PATH=/opt/module/go/go1.25.0/bin:$PATH
-go build -o bin/server .
+PKG=github.com/LemonZuo/account-vault/internal/buildinfo
+go build -ldflags="-s -w -X ${PKG}.Version=$(git describe --tags --always) -X ${PKG}.Commit=$(git rev-parse --short HEAD)" -o bin/server .
 
 # 运行
 ./bin/server   # 同时提供 /api 和 / （前端）
@@ -75,10 +81,31 @@ go build -o bin/server .
 
 `npm run build` 末尾会自动补回 `frontend/dist/.gitkeep`（vite `emptyOutDir` 会清掉），保证下次 fresh clone 时 `//go:embed` 不至于因目录为空报错。
 
+CI（`.github/workflows/release.yml`）会自动算 `BuildID` 并 `-X` 注入，本地手 build 时省略也无所谓 —— 默认 `dev / unknown / none`。
+
+## 测试
+
+```sh
+go test ./internal/...
+```
+
+目前覆盖 `internal/logx`（slog handler 格式 / 级别解析 / 引号判断 / WithAttrs+WithGroup）和 `internal/config`（默认值、env 覆盖、DSN、normalizePort 边界）。CRUD handler 不引入测试 DB，依赖 `logx.NewGormLogger` 把 SQL 错误捕获到日志。
+
+## pre-commit 钩子
+
+`.githooks/pre-commit` 不入库（`.git/info/exclude` 排除），每个 clone 启用一次：
+
+```sh
+git config core.hooksPath .githooks
+```
+
+钩子只对 staged `.go` 文件跑 `gofmt -l` + 全仓 `go vet ./...`，未通过即阻断。
+
 ## 注意事项
 
 - go.mod 要求 Go ≥ 1.25，开发用 `/opt/module/go/go1.25.0`
 - 不要在公开文档中直接列出具体数据结构
 - 默认按可信网络环境使用；公网部署时应在外层增加访问控制
+- 日志统一走 `internal/logx`（slog 结构化），级别由 `LOG_LEVEL` 控制；gorm 错误/慢 SQL(>300ms) 自动分级到 logx
 - 卡片右上角的操作按钮在桌面 hover 时显示，移动端常驻
 - Tailwind 用的是 v4（`@import "tailwindcss";`），没有 `tailwind.config.js`，配置通过 CSS 变量即可
