@@ -3,11 +3,11 @@ package main
 import (
 	"embed"
 	"io/fs"
-	"log"
 
 	"github.com/LemonZuo/account-vault/internal/buildinfo"
 	"github.com/LemonZuo/account-vault/internal/config"
 	"github.com/LemonZuo/account-vault/internal/db"
+	"github.com/LemonZuo/account-vault/internal/logx"
 	"github.com/LemonZuo/account-vault/internal/router"
 )
 
@@ -15,23 +15,29 @@ import (
 var frontendFS embed.FS
 
 func main() {
-	log.Printf("account-vault %s (commit %s) starting", buildinfo.Version, buildinfo.Commit)
-
 	cfg := config.Load()
+	logx.Init(cfg.LogLevel)
+
+	logx.Info("account-vault starting",
+		"version", buildinfo.Version,
+		"commit", buildinfo.Commit,
+		"build", buildinfo.BuildID,
+		"log_level", cfg.LogLevel,
+	)
 
 	gormDB, err := db.New(cfg)
 	if err != nil {
-		log.Fatalf("connect db: %v", err)
+		logx.Fatal("connect db", "err", err)
 	}
 
 	dist, err := fs.Sub(frontendFS, "frontend/dist")
 	if err != nil {
-		log.Fatalf("sub frontend/dist: %v", err)
+		logx.Fatal("sub frontend/dist", "err", err)
 	}
 
 	r := router.Setup(gormDB, dist)
-	log.Printf("server listening on %s", cfg.ListenURL())
+	logx.Info("server listening", "url", cfg.ListenURL())
 	if err := r.Run(cfg.ListenAddr()); err != nil {
-		log.Fatalf("run server: %v", err)
+		logx.Fatal("run server", "err", err)
 	}
 }

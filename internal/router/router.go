@@ -49,8 +49,9 @@ func Setup(db *gorm.DB, frontend fs.FS) *gin.Engine {
 
 	api.GET("/version", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"version": buildinfo.Version,
-			"commit":  buildinfo.Commit,
+			"version":  buildinfo.Version,
+			"commit":   buildinfo.Commit,
+			"build_id": buildinfo.BuildID,
 		})
 	})
 

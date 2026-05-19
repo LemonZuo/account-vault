@@ -16,6 +16,9 @@ type Config struct {
 	DBName     string
 	DBCharset  string
 	ServerPort string
+
+	// 日志级别：debug | info | warn | error（默认 info）。仅控制台输出，不落文件。
+	LogLevel string
 }
 
 func Load() *Config {
@@ -28,6 +31,8 @@ func Load() *Config {
 		DBName:     env("DB_NAME", ""),
 		DBCharset:  env("DB_CHARSET", "utf8mb4"),
 		ServerPort: normalizePort(env("SERVER_PORT", "8080")),
+
+		LogLevel: env("LOG_LEVEL", "info"),
 	}
 }
 
