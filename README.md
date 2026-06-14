@@ -1,209 +1,54 @@
 # Account Vault
 
-个人数据管理工具，采用 Go（Gin + GORM）后端与 React（Vite + TS + Tailwind v4）前端，
-风格为卡片式现代极简，桌面端与移动端均自适应。
+个人数据管理工具，针对一台 MySQL 实例上的若干数据表提供新增、查看、修改与删除能力。
+默认面向可信网络环境；如需公网暴露，应在外层增加访问控制。
 
-## 目录
+## 功能
 
-```
-account-vault/
-├── main.go
-├── go.mod / go.sum
-├── .env / .env.example
-├── cliff.toml
-├── internal/{buildinfo,config,db,handler,logx,model,router,web}
-└── frontend/
-    ├── dist/
-    └── src/{App.tsx, components, tables.ts, api.ts}
-```
+- 单一界面集中管理 9 张账号/凭据表（Apple、OpenAI、Claude、IDC Flare、Linux.do、宽带账户、软件账号、组件账号、中间件账号）。
+- 后端使用泛型 CRUD，所有表共用同一套增删改查实现。
+- 前端使用卡片式现代极简风格，桌面端与移动端均自适应。
+- 单二进制发布：前端构建产物通过 `//go:embed all:frontend/dist` 嵌入 Go 二进制。
 
-## 后端启动
+## 不在范围
 
-1. 拷贝并填写环境变量：
-   ```sh
-   cp .env.example .env
-   # 编辑 .env 填上 DB_HOST / DB_PORT / DB_USER / DB_PASSWORD / DB_NAME
-   ```
+- 不内置鉴权：默认运行于可信内网，公网访问应由反向代理 + tinyauth 等鉴权层前置。
+- 不做主动型任务：调度、通知、外部 SDK 不在范围。
+- 不存储任意富文本/文件：仅维护结构化、字段固定的数据表。
 
-2. 选用本地的 Go（多版本目录 `/opt/module/go`，需要 ≥ 1.25）：
-   ```sh
-   export PATH=/opt/module/go/go1.25.0/bin:$PATH
-   go run .
-   # 或者构建后运行
-   go build -o bin/server . && ./bin/server
-   ```
+## 技术栈
 
-   服务默认监听 `http://0.0.0.0:8080`，可通过 `.env` 中的 `SERVER_PORT` 调整；日志级别由 `LOG_LEVEL`（debug / info / warn / error）控制。
+- 后端：Go 1.25+、Gin、GORM、MySQL 驱动、godotenv。
+- 前端：React 19、Vite、TypeScript、Tailwind CSS v4、react-router-dom、axios、lucide-react。
+- 部署：前端构建产物通过 `//go:embed all:frontend/dist` 嵌入 Go 二进制，最终以单二进制方式运行。
 
-## 前端启动
+## 文档导航
+
+按场景拆分，按需查阅：
+
+- [docs/deployment.md](docs/deployment.md) — 部署：数据库准备、Docker Compose、裸机二进制 + systemd、Nginx + tinyauth 反代、健康检查、发布与备份、故障排查。
+- [docs/development.md](docs/development.md) — 开发：环境要求、目录结构、`.env` 配置项详表、启动顺序、本地开发、常用命令、新增表流程。
+- [docs/api.md](docs/api.md) — API：通用约定、健康检查与版本、表元信息、9 张表共用的通用 CRUD 端点。
+
+## Quick start
+
+最小启动路径，详细说明参见上方文档。
 
 ```sh
-cd frontend
-npm install      # 已安装可省略
-npm run dev      # 开发模式，默认 http://localhost:5173
-npm run build    # 生产构建至 dist/，由 //go:embed 嵌入后端二进制
-```
-
-Vite 已将 `/api` 代理至 `http://localhost:8080`，开发环境无需额外配置 CORS。
-
-## 单二进制发布
-
-```sh
-cd frontend && npm run build && cd ..
-go build -o bin/server .
-./bin/server   # 同时提供 /api 与 /（前端 SPA）
-```
-
-## API
-
-后端提供前端所需的数据读写能力。具体数据细节以代码与实际部署配置为准，README 不再展开。
-`GET /api/version` 返回 `version` / `commit` / `build_id`（由 ldflags 注入，默认值为 `dev` / `unknown` / `none`）。
-`GET /healthz`（挂载于根路径，不在 `/api` 之下）用于容器健康探针：2 秒超时内完成 DB ping，正常返回 200，失败返回 503。Dockerfile 与 docker-compose 均已配置 HEALTHCHECK 调用该端点，Gin 路由跳过其 access log。
-
-## Docker
-
-仓库提供的 `docker-compose.yml` 包含两个服务：
-
-- `account-vault`：应用本体，监听 `8080`。配置通过 `.env`（只读挂载至容器 `/app/.env`），由 `godotenv.Load()` 自动加载。
-- `tinyauth`：前置登录网关，监听 `3000`。account-vault 自身不内置鉴权，公网入口建议部署在反代之后，由 tinyauth 处理登录拦截后再回源至 account-vault。其配置直接写入 compose 文件，不读取 `.env`。
-
-1. 准备 account-vault 配置：
-
-```sh
+# 1. 准备 MySQL 与 .env（后端不做 AutoMigrate，需预先建表）
 cp .env.example .env
-# 编辑 .env 填上 DB_HOST / DB_PORT / DB_USER / DB_PASSWORD / DB_NAME 等
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS account_vault DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# 按 internal/model/models.go 中各结构体创建 tb_* 表
+
+# 2. 启动后端（默认监听 :8080）
+export PATH=/opt/module/go/go1.25.0/bin:$PATH
+go run .
+
+# 3. 启动前端（:5173，/api 默认代理至 :8080）
+cd frontend && npm install && npm run dev
 ```
 
-注意：容器内的 `127.0.0.1` 指向容器自身。若 MySQL 运行在宿主机或其他机器，`DB_HOST` 应填写容器可访问的宿主机地址、局域网 IP、Docker 网络中的服务名或对应的数据库地址。
-
-2. 配置 tinyauth：编辑 `docker-compose.yml` 中 `tinyauth.environment` 的三个占位值：
-
-- `SECRET`：32 字节随机串，例如 `openssl rand -hex 16`。
-- `USERS`：`user:bcrypt-hash` 形式，可使用以下 docker 命令生成：
-
-  ```sh
-  docker run --rm httpd:alpine htpasswd -nbB admin '你的密码'
-  ```
-
-  将输出填入 `USERS`，并将其中每个 `$` 替换为 `$$`——compose 会对 `$xxx` 做变量插值，双写后表示字面量 `$`，容器内仍为单个 `$`。
-
-- `APP_URL`：tinyauth 自身的对外访问入口（反代后通常为 `https://auth.example.com`），用于登录回跳。
-
-3. 启动服务：
-
-```sh
-mkdir -p data/tinyauth
-docker compose pull
-docker compose up -d
-```
-
-启动后访问：
-
-```text
-http://localhost:8080   # account-vault（直接访问，绕过鉴权）
-http://localhost:3000   # tinyauth 登录页
-```
-
-公网部署时应仅由反代暴露 tinyauth，account-vault 端口不对外开放，反代鉴权通过后回源至 account-vault 容器。
-
-4. 查看状态和日志：
-
-```sh
-docker compose ps
-docker compose logs -f account-vault
-docker compose logs -f tinyauth
-```
-
-5. 更新镜像：
-
-```sh
-docker compose pull
-docker compose up -d
-```
-
-持久化卷：
-
-| 宿主机路径 | 容器路径 | 用途 |
-| --- | --- | --- |
-| `./.env` | `/app/.env` | account-vault 应用配置，只读挂载 |
-| `./data/tinyauth` | `/data` | tinyauth 用户会话等持久化数据 |
-
-## Nginx 反向代理
-
-以下是将 account-vault 与 tinyauth 置于 nginx 反代之后、由 tinyauth 鉴权保护 account-vault 入口的最小模板。两个域名各一个 server 块，account-vault 通过 `auth_request` 调用 tinyauth 的鉴权接口，401 时重定向至 tinyauth 登录页。SSL 证书路径与上游端口（与 compose 保持一致：account-vault `8080` / tinyauth `3000`）请按实际部署调整。
-
-```nginx
-# 1. tinyauth 登录页本身
-server {
-    listen 443 ssl;
-    server_name auth.example.com;
-
-    ssl_certificate     /etc/nginx/certs/auth.example.com.pem;
-    ssl_certificate_key /etc/nginx/certs/auth.example.com.key;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host              $host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-# 2. account-vault 主入口,经 tinyauth 鉴权后转发
-server {
-    listen 443 ssl;
-    server_name vault.example.com;
-
-    ssl_certificate     /etc/nginx/certs/vault.example.com.pem;
-    ssl_certificate_key /etc/nginx/certs/vault.example.com.key;
-
-    location / {
-        auth_request /auth;
-        error_page 401 = @login;
-
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host              $host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # 内部 auth 子请求,转发给 tinyauth
-    location = /auth {
-        internal;
-        proxy_pass http://127.0.0.1:3000/api/auth/nginx;
-        proxy_set_header Host              $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host  $host;
-        proxy_set_header X-Forwarded-Uri   $request_uri;
-        proxy_pass_request_body off;
-        proxy_set_header Content-Length "";
-    }
-
-    # 未登录跳到 tinyauth 登录页,登录成功后回到原 URL
-    location @login {
-        return 302 https://auth.example.com/login?redirect_uri=$scheme://$host$request_uri;
-    }
-}
-```
-
-> tinyauth 的鉴权 endpoint（示例中的 `/api/auth/nginx`）与登录回跳参数名以当前版本官方文档为准，如有差异请按官方文档替换。
-> 启用反代后，宿主机不应将 account-vault 的 `8080` 端口对公网开放，由 nginx 通过环回地址（`127.0.0.1`）单独回源；tinyauth 的 `3000` 端口同理。
-
-## 测试与钩子
-
-```sh
-go test ./internal/...   # 覆盖 logx 与 config 两块
-```
-
-可选启用 pre-commit 门禁（`.githooks/pre-commit`，本地配置，不入库）：
-
-```sh
-git config core.hooksPath .githooks
-```
-
-钩子仅对 staged `.go` 文件执行 `gofmt -l`，并对全仓执行 `go vet ./...`，任一未通过即阻断提交。
+容器化部署参见 [docs/deployment.md](docs/deployment.md) 中的 Docker Compose 章节。
 
 ## 设计要点
 
