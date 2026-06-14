@@ -1,7 +1,7 @@
 # Account Vault
 
-一套个人数据管理工具，Go (Gin + GORM) 后端 + React (Vite + TS + Tailwind v4) 前端，
-卡片式现代极简风格，桌面端和移动端均自适应。
+个人数据管理工具，采用 Go（Gin + GORM）后端与 React（Vite + TS + Tailwind v4）前端，
+风格为卡片式现代极简，桌面端与移动端均自适应。
 
 ## 目录
 
@@ -33,38 +33,39 @@ account-vault/
    go build -o bin/server . && ./bin/server
    ```
 
-   服务默认监听 `http://0.0.0.0:8080`，可在 `.env` 中改 `SERVER_PORT`；日志级别由 `LOG_LEVEL`（debug/info/warn/error）控制。
+   服务默认监听 `http://0.0.0.0:8080`，可通过 `.env` 中的 `SERVER_PORT` 调整；日志级别由 `LOG_LEVEL`（debug / info / warn / error）控制。
 
 ## 前端启动
 
 ```sh
 cd frontend
-npm install      # 已安装可跳过
+npm install      # 已安装可省略
 npm run dev      # 开发模式，默认 http://localhost:5173
-npm run build    # 生产构建到 dist/，被 //go:embed 打入后端二进制
+npm run build    # 生产构建至 dist/，由 //go:embed 嵌入后端二进制
 ```
 
-Vite 已配置 `/api` 代理到 `http://localhost:8080`，开发环境无需另开 CORS。
+Vite 已将 `/api` 代理至 `http://localhost:8080`，开发环境无需额外配置 CORS。
 
 ## 单二进制发布
 
 ```sh
 cd frontend && npm run build && cd ..
 go build -o bin/server .
-./bin/server   # 同时提供 /api 和 / （前端 SPA）
+./bin/server   # 同时提供 /api 与 /（前端 SPA）
 ```
 
 ## API
 
-后端提供前端所需的数据读写能力。具体数据细节以代码与实际部署配置为准，README 不展开。
-`GET /api/version` 返回 `version` / `commit` / `build_id`（ldflags 注入，默认 `dev` / `unknown` / `none`）。
+后端提供前端所需的数据读写能力。具体数据细节以代码与实际部署配置为准，README 不再展开。
+`GET /api/version` 返回 `version` / `commit` / `build_id`（由 ldflags 注入，默认值为 `dev` / `unknown` / `none`）。
+`GET /healthz`（挂载于根路径，不在 `/api` 之下）用于容器健康探针：2 秒超时内完成 DB ping，正常返回 200，失败返回 503。Dockerfile 与 docker-compose 均已配置 HEALTHCHECK 调用该端点，Gin 路由跳过其 access log。
 
 ## Docker
 
-仓库里的 `docker-compose.yml` 包含两个服务：
+仓库提供的 `docker-compose.yml` 包含两个服务：
 
-- `account-vault`：业务本体，监听 `8080`。配置走 `.env`（只读挂载到容器 `/app/.env`），`godotenv.Load()` 会自动读到。
-- `tinyauth`：前置登录网关，监听 `3000`。account-vault 不内置鉴权，公网入口建议挂在反代后面、由 tinyauth 做登录拦截，再回源到 account-vault。配置直接写在 compose 里，不读 `.env`。
+- `account-vault`：应用本体，监听 `8080`。配置通过 `.env`（只读挂载至容器 `/app/.env`），由 `godotenv.Load()` 自动加载。
+- `tinyauth`：前置登录网关，监听 `3000`。account-vault 自身不内置鉴权，公网入口建议部署在反代之后，由 tinyauth 处理登录拦截后再回源至 account-vault。其配置直接写入 compose 文件，不读取 `.env`。
 
 1. 准备 account-vault 配置：
 
@@ -73,20 +74,20 @@ cp .env.example .env
 # 编辑 .env 填上 DB_HOST / DB_PORT / DB_USER / DB_PASSWORD / DB_NAME 等
 ```
 
-注意：容器里的 `127.0.0.1` 指向容器自己。如果 MySQL 跑在宿主机或其他机器上，`DB_HOST` 应填写宿主机可被容器访问的地址、局域网 IP、Docker 网络里的服务名，或你自己的数据库地址。
+注意：容器内的 `127.0.0.1` 指向容器自身。若 MySQL 运行在宿主机或其他机器，`DB_HOST` 应填写容器可访问的宿主机地址、局域网 IP、Docker 网络中的服务名或对应的数据库地址。
 
-2. 配置 tinyauth：直接编辑 `docker-compose.yml` 中 `tinyauth.environment` 三个占位值：
+2. 配置 tinyauth：编辑 `docker-compose.yml` 中 `tinyauth.environment` 的三个占位值：
 
 - `SECRET`：32 字节随机串，例如 `openssl rand -hex 16`。
-- `USERS`：`user:bcrypt-hash` 形式。可用下面的 docker 命令生成：
+- `USERS`：`user:bcrypt-hash` 形式，可使用以下 docker 命令生成：
 
   ```sh
   docker run --rm httpd:alpine htpasswd -nbB admin '你的密码'
   ```
 
-  把输出原样填进 `USERS`，**每个 `$` 都改写成 `$$`**——compose 会把 `$xxx` 当变量插值，双写后才是字面 `$`，容器内仍是单 `$`。
+  将输出填入 `USERS`，并将其中每个 `$` 替换为 `$$`——compose 会对 `$xxx` 做变量插值，双写后表示字面量 `$`，容器内仍为单个 `$`。
 
-- `APP_URL`：tinyauth 自身对外访问入口（反代后通常是 `https://auth.example.com`），用于登录回跳。
+- `APP_URL`：tinyauth 自身的对外访问入口（反代后通常为 `https://auth.example.com`），用于登录回跳。
 
 3. 启动服务：
 
@@ -99,11 +100,11 @@ docker compose up -d
 启动后访问：
 
 ```text
-http://localhost:8080   # account-vault（直接访问，绕开鉴权）
+http://localhost:8080   # account-vault（直接访问，绕过鉴权）
 http://localhost:3000   # tinyauth 登录页
 ```
 
-公网部署时应由反代仅暴露 tinyauth，account-vault 端口收回内网，由反代鉴权通过后回源到 account-vault 容器。
+公网部署时应仅由反代暴露 tinyauth，account-vault 端口不对外开放，反代鉴权通过后回源至 account-vault 容器。
 
 4. 查看状态和日志：
 
@@ -129,7 +130,7 @@ docker compose up -d
 
 ## Nginx 反向代理
 
-下面是把 account-vault 和 tinyauth 放在 nginx 后面、用 tinyauth 拦截 account-vault 入口的最小模板。两个域名各一个 server 块，account-vault 这块通过 `auth_request` 调 tinyauth 的鉴权接口，401 时重定向到 tinyauth 登录页。SSL 证书路径、上游端口（与 compose 一致：account-vault `8080` / tinyauth `3000`）按实际改。
+以下是将 account-vault 与 tinyauth 置于 nginx 反代之后、由 tinyauth 鉴权保护 account-vault 入口的最小模板。两个域名各一个 server 块，account-vault 通过 `auth_request` 调用 tinyauth 的鉴权接口，401 时重定向至 tinyauth 登录页。SSL 证书路径与上游端口（与 compose 保持一致：account-vault `8080` / tinyauth `3000`）请按实际部署调整。
 
 ```nginx
 # 1. tinyauth 登录页本身
@@ -187,26 +188,26 @@ server {
 }
 ```
 
-> tinyauth 的鉴权 endpoint(示例里写的 `/api/auth/nginx`)和登录回跳参数名以 tinyauth 当前版本文档为准,有差异时按其文档替换即可。
-> 启用反代后，宿主机不应把 account-vault 的 `8080` 端口对公网开放，由 nginx 走环回(`127.0.0.1`)单独回源；tinyauth 的 `3000` 同理。
+> tinyauth 的鉴权 endpoint（示例中的 `/api/auth/nginx`）与登录回跳参数名以当前版本官方文档为准，如有差异请按官方文档替换。
+> 启用反代后，宿主机不应将 account-vault 的 `8080` 端口对公网开放，由 nginx 通过环回地址（`127.0.0.1`）单独回源；tinyauth 的 `3000` 端口同理。
 
 ## 测试与钩子
 
 ```sh
-go test ./internal/...   # logx + config 两块
+go test ./internal/...   # 覆盖 logx 与 config 两块
 ```
 
-可选启用 pre-commit 门禁（`.githooks/pre-commit`，本地配置不入库）：
+可选启用 pre-commit 门禁（`.githooks/pre-commit`，本地配置，不入库）：
 
 ```sh
 git config core.hooksPath .githooks
 ```
 
-只对 staged `.go` 文件跑 `gofmt -l` + 全仓 `go vet ./...`。
+钩子仅对 staged `.go` 文件执行 `gofmt -l`，并对全仓执行 `go vet ./...`，任一未通过即阻断提交。
 
 ## 设计要点
 
 - **部署边界**：默认面向可信网络环境；如需公网暴露，应在外层增加访问控制。
-- **响应式**：≥640px 显示左侧固定导航；移动端顶栏 + 底部横向滚动 tab。
-- **新增/编辑**：底部弹起的卡片式 Modal，移动端体验接近原生 sheet。
-- **日志**：统一 `internal/logx`（slog + 可读 handler），gorm 错误/慢 SQL(>300ms) 自动分级到 logx，`LOG_LEVEL=debug` 时打印每条 SQL。
+- **响应式**：宽度 ≥ 640px 显示左侧固定导航；移动端采用顶栏配合底部横向滚动 tab。
+- **新增 / 编辑**：底部弹出的卡片式 Modal，移动端表现接近原生 sheet。
+- **日志**：统一使用 `internal/logx`（slog + 自定义可读 handler）；gorm 错误与慢 SQL（> 300ms）自动按级别接入 logx，`LOG_LEVEL=debug` 时输出每条 SQL。
