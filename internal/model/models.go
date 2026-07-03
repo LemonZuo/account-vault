@@ -54,10 +54,11 @@ type Openai struct {
 func (Openai) TableName() string { return "tb_openai" }
 
 type Claude struct {
-	ID         int    `gorm:"primaryKey;column:id" json:"id"`
-	Mail       string `gorm:"column:mail" json:"mail"`
-	SessionKey string `gorm:"column:session_key" json:"session_key"`
-	Area       string `gorm:"column:area" json:"area"`
+	ID           int    `gorm:"primaryKey;column:id" json:"id"`
+	Mail         string `gorm:"column:mail" json:"mail"`
+	SessionKey   string `gorm:"column:session_key" json:"session_key"`
+	Area         string `gorm:"column:area" json:"area"`
+	AppleID      string `gorm:"column:apple_id" json:"apple_id"`
 }
 
 func (Claude) TableName() string { return "tb_claude" }

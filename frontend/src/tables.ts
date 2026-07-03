@@ -66,6 +66,7 @@ export const tables: TableDef[] = [
       { key: 'mail', label: '邮箱' },
       { key: 'session_key', label: '会话密钥', type: 'password' },
       { key: 'area', label: '区域' },
+      { key: 'apple_id', label: 'Apple ID', placeholder: 'xxx@icloud.com' },
     ],
   },
   {
